@@ -1,0 +1,125 @@
+begin transaction;
+.mode column
+.header on
+drop table goods;
+drop table category;
+drop table goodStatus;
+drop table user;
+drop table shoppingDetail;
+drop table orders;
+drop table orderDetail;
+drop table orderStatus;
+drop table comment;
+--新建商品表
+create table goods(
+	id integer primary key autoincrement,
+	name verchar(20) unique not null,
+	price real not null check(price>=0),
+	stock integer not null check(stock>=0),
+	describe text,
+	categoryId integer not null,
+	gStatusId integer not null check(gStatusId>=0),
+	foreign key(categoryId) references category(id),
+	foreign key(gStatusId) references goodStatus(id)
+);
+
+--新建分类信息表
+create table category(
+	id integer primary key autoincrement,
+	category verchar(10) not null unique
+);
+
+--添加默认的分类
+--insert into category(category) values('服装首饰');
+--insert into category(category) values('食品零食');
+--insert into category(category) values('耐用品');
+--insert into category(category) values('数码产品');
+
+--新建商品状态表
+create table goodStatus(
+	id integer primary key autoincrement,
+	status verchar(10) not null unique
+);
+
+--添加默认的状态信息
+--insert into goodStatus(status) values('已下架');
+--insert into goodStatus(status) values('热销中');
+--insert into goodStatus(status) values('促销中');
+
+--新建用户表
+create table user(
+	id integer primary key autoincrement,
+	userName verchar(20) unique not null,
+	pwd verchar(20) not null,
+	address text,
+	email text,
+	exp integer check(exp>=0),
+	level integer check(level>=0),
+	balance real check(balance>=0)
+);
+--添加默认的管理员信息
+insert into user(userName,pwd,address,email,exp,level,balance) values('admin','admin','aaa','aaa',0,0,0);
+
+--新建购物项表
+create table shoppingDetail(
+	id integer primary key autoincrement,
+	gid integer,
+	uid integer,
+	num integer check(num>=0),
+	totalPrice real check(totalPrice>=0),
+	foreign key(gid) references goods(id),
+	foreign key(uid) references user(id)
+);
+
+--新建订单表
+create table orders(
+	id integer primary key autoincrement,
+	uid integer,
+	date text,
+	oStatusId integer not null check(oStatusId>=0),
+	totalPrice real check(totalPrice>=0),
+	foreign key(uid) references user(id),
+	foreign key(oStatusId) references orderStatus(id)
+);
+
+--新建订单明细项表
+create table orderDetail(
+	id integer primary key autoincrement,
+	gid integer,
+	oid integer,
+	num integer check(num>=0),
+	totalPrice real check(totalPrice>=0),
+	oStatusId integer not null check(oStatusId>0),
+	foreign key(gid) references goods(id),
+	foreign key(oid) references orders(id),
+	foreign key(oStatusId) references orderStatus(id)
+);
+
+--新建订单状态表
+create table orderStatus(
+	id integer primary key autoincrement,
+	status verchar(10) not null unique
+);
+
+--添加默认的状态信息
+--insert into orderStatus(status) values('已提交');
+--insert into orderStatus(status) values('审核中');
+--insert into orderStatus(status) values('待付款');
+--insert into orderStatus(status) values('已发货');
+--insert into orderStatus(status) values('完成');
+
+
+--新建商品评价表
+create table comment(
+	id integer primary key autoincrement,
+	gid integer,
+	uid integer,
+	oid integer,
+	content text,
+	foreign key(gid) references goods(id),
+	foreign key(uid) references user(id),	
+	foreign key(oid) references orders(id)
+);
+commit;
+
+
